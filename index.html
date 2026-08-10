@@ -19,6 +19,58 @@
     --muted:#9b958f;
     --line:rgba(247,245,242,.1);
   }
+  /* ===== Custom cursor ===== */
+  @media (pointer:fine){
+    body.custom-cursor-active, body.custom-cursor-active *{cursor:none !important;}
+  }
+  .cursor-dot,.cursor-ring{
+    position:fixed;top:0;left:0;
+    pointer-events:none;
+    z-index:9999;
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    will-change:transform;
+  }
+  .cursor-dot{
+    width:6px;height:6px;
+    background:var(--ember-1);
+    transition:width .2s ease, height .2s ease, background .2s ease, opacity .2s ease;
+  }
+  .cursor-ring{
+    width:34px;height:34px;
+    border:1px solid var(--ember-1);
+    opacity:.7;
+    transition:width .3s ease, height .3s ease, border-color .3s ease, opacity .3s ease, background .3s ease;
+  }
+  body.cursor-hover .cursor-ring{
+    width:64px;height:64px;
+    background:rgba(193,75,255,.12);
+    border-color:var(--ember-1);
+    opacity:1;
+  }
+  body.cursor-hover .cursor-dot{
+    width:8px;height:8px;
+    opacity:0;
+  }
+  body.cursor-click .cursor-ring{width:28px;height:28px;}
+  @media (pointer:coarse){
+    .cursor-dot,.cursor-ring{display:none;}
+  }
+  .touch-ripple{
+    position:fixed;
+    pointer-events:none;
+    z-index:9999;
+    border-radius:50%;
+    border:2px solid var(--ember-1);
+    background:rgba(193,75,255,.18);
+    transform:translate(-50%,-50%) scale(0);
+    opacity:.9;
+    animation:touchRippleAnim .6s ease-out forwards;
+  }
+  @keyframes touchRippleAnim{
+    0%{transform:translate(-50%,-50%) scale(0);opacity:.9;}
+    100%{transform:translate(-50%,-50%) scale(1);opacity:0;}
+  }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{
@@ -54,11 +106,18 @@
     transition:height .3s ease, width .3s ease;
   }
   nav.scrolled .logo .logo-mark-img{height:30px;width:30px;}
-  .logo .logo-text{
-    font-weight:800;font-size:1.05rem;letter-spacing:.02em;color:var(--white);
+  .logo .logo-text-wrap{display:flex;flex-direction:column;line-height:1.1;}
+  .logo .logo-text-main{
+    font-weight:800;font-size:1.15rem;letter-spacing:.06em;color:var(--white);
     transition:font-size .3s ease;
   }
-  nav.scrolled .logo .logo-text{font-size:.92rem;}
+  .logo .logo-text-sub{
+    font-size:.62rem;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--muted);margin-top:3px;
+    transition:opacity .3s ease, max-height .3s ease, margin-top .3s ease;
+    max-height:14px;opacity:1;
+  }
+  nav.scrolled .logo .logo-text-main{font-size:1rem;}
   .nav-links{display:flex;gap:34px;font-size:.9rem;color:var(--muted);}
   .nav-links a{text-decoration:none;transition:color .2s;}
   .nav-links a:hover{color:var(--white);}
@@ -135,8 +194,50 @@
     transition:opacity .7s cubic-bezier(.16,.8,.3,1), transform .7s cubic-bezier(.16,.8,.3,1);
   }
   .reveal.in-view{opacity:1;transform:translateY(0);}
+
+  /* ---------- SCROLL ANIMATION VARIANTS ---------- */
+  .reveal-scale{
+    opacity:0;transform:scale(.82);
+    transition:opacity .7s cubic-bezier(.16,.8,.3,1), transform .7s cubic-bezier(.16,.8,.3,1);
+  }
+  .reveal-scale.in-view{opacity:1;transform:scale(1);}
+
+  .reveal-blur{
+    opacity:0;filter:blur(16px);transform:translateY(24px);
+    transition:opacity .9s ease, filter .9s ease, transform .9s ease;
+  }
+  .reveal-blur.in-view{opacity:1;filter:blur(0);transform:translateY(0);}
+
+  .reveal-left{
+    opacity:0;transform:translateX(-70px);
+    transition:opacity .7s cubic-bezier(.16,.8,.3,1), transform .7s cubic-bezier(.16,.8,.3,1);
+  }
+  .reveal-left.in-view{opacity:1;transform:translateX(0);}
+
+  .reveal-right{
+    opacity:0;transform:translateX(70px);
+    transition:opacity .7s cubic-bezier(.16,.8,.3,1), transform .7s cubic-bezier(.16,.8,.3,1);
+  }
+  .reveal-right.in-view{opacity:1;transform:translateX(0);}
+
+  .reveal-clip{
+    opacity:0;
+    clip-path:inset(0 0 100% 0);
+    transform:scale(1.06);
+    transition:opacity .5s ease, clip-path .9s cubic-bezier(.65,0,.35,1), transform .9s cubic-bezier(.65,0,.35,1);
+  }
+  .reveal-clip.in-view{opacity:1;clip-path:inset(0 0 0% 0);transform:scale(1);}
+
+  .reveal-rotate{
+    opacity:0;transform:rotate(-7deg) scale(.88);
+    transition:opacity .7s ease, transform .8s cubic-bezier(.34,1.56,.64,1);
+  }
+  .reveal-rotate.in-view{opacity:1;transform:rotate(0) scale(1);}
+
   @media (prefers-reduced-motion: reduce){
-    .reveal{opacity:1;transform:none;transition:none;}
+    .reveal, .reveal-scale, .reveal-blur, .reveal-left, .reveal-right, .reveal-clip, .reveal-rotate{
+      opacity:1;transform:none;filter:none;clip-path:none;transition:none;
+    }
   }
 
   .hero{
@@ -450,6 +551,7 @@
     display:none !important;
   }
   .p-card-wrap.c3{width:300px;}
+  .p-card-wrap.c3 .p-card{background:linear-gradient(160deg,#a21caf,#4c1d95);}
   .p-card-wrap .p-card::before, .p-card-wrap .p-card::after{display:none;}
   .p-card-caption{position:absolute;top:100%;left:2px;right:2px;margin-top:12px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;}
   .p-card-caption .p-tag{
@@ -495,7 +597,24 @@
   }
 
   /* ---------- SERVICES ---------- */
-  .services{padding:0 6vw 48px;}
+  .services{
+    padding:64px 6vw 56px;
+    background: linear-gradient(160deg, #f3ebfc, #e7d6f8 55%, #dac3f3);
+    color:#1c1526;
+  }
+  @media (max-width:760px){
+    .services{padding:40px 6vw 40px;}
+  }
+  .services .about-eyebrow{color:#7b2ff0;}
+  .services .services-head h2{color:#1c1526;}
+  .services .portfolio-heading{color:rgba(28,21,38,.82);}
+  .services .portfolio-heading em{color:#7b2ff0;}
+  .services .s-num{color:#7b2ff0;}
+  .services .s-row{border-top-color:rgba(28,21,38,.15);}
+  .services .s-row:last-child{border-bottom-color:rgba(28,21,38,.15);}
+  .services .s-row h3{color:#1c1526;}
+  .services .s-row p{color:#5b4f66;}
+  .services .s-tags span{color:#5b4f66;border-color:rgba(28,21,38,.2);}
   .services-head{max-width:640px;margin-bottom:52px;}
   .services-head .about-eyebrow{margin-bottom:14px;}
   .services-head h2{font-size:clamp(1.9rem,3.6vw,2.8rem);font-weight:800;line-height:1.1;letter-spacing:-.01em;}
@@ -681,9 +800,11 @@
 </style>
 </head>
 <body>
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
 
 <nav id="mainNav">
-  <div class="logo"><img class="logo-mark-img" src="assets/ftc-world-logo.png" alt="FTC World logo"><span class="logo-text">FTC WORLD</span></div>
+  <div class="logo"><img class="logo-mark-img" src="assets/ftc-world-logo.png" alt="FTC World logo"><div class="logo-text-wrap"><span class="logo-text-main">WORLD</span><span class="logo-text-sub">Free Time Creative</span></div></div>
   <div class="nav-links">
     <a href="#about">About</a>
     <a href="#services">Services</a>
@@ -754,7 +875,7 @@
     </div>
     <div class="simple-grid">
       <div class="s-card"><img src="assets/campaign-visual-1.jpg" alt="Campaign visual 1"><img src="assets/campaign-visual-2.jpg" alt="Campaign visual 2"><img src="assets/campaign-visual-3.jpg" alt="Campaign visual 3"><span class="s-label">Campaign</span></div>
-      <div class="s-card"><video src="assets/product.mp4" autoplay muted loop playsinline></video><span class="s-label">Product</span></div>
+      <div class="s-card"><video src="assets/product.mp4.MOV" autoplay muted loop playsinline></video><span class="s-label">Product</span></div>
       <div class="s-card"><img src="assets/editorial-visual.jpg" alt="Editorial visual"><span class="s-label">Editorial</span></div>
       <a href="https://www.instagram.com/purpleview.zl/" target="_blank" rel="noopener" class="more-on-ig more-on-ig-mobile">See more on Instagram <span class="arrow-inline">→</span></a>
     </div>
@@ -1032,31 +1153,76 @@
 
 <script>
   (function(){
-    const selectors = [
-      '.about > div', '.about-side',
-      '.services-head',
-      '.s-row',
-      '.simple-grid .s-card',
-      '.p-grid .p-card',
-      '.trusted-card',
-      '.contact h2', '.contact > p', '.contact-cta-row', '.contact-info', '.contact-form'
+    // Assign a distinct animation style to each group of elements
+    const groups = [
+      { selector: '.about > div, .about-side', cls: 'reveal-blur' },
+      { selector: '.services-head', cls: 'reveal-up' },
+      { selector: '.simple-grid .s-card', cls: 'reveal-scale' },
+      { selector: '.trusted-card', cls: 'reveal-rotate' },
+      { selector: '.contact h2, .contact > p', cls: 'reveal-blur' },
+      { selector: '.contact-cta-row, .contact-info, .contact-form', cls: 'reveal-scale' }
     ];
-    const els = document.querySelectorAll(selectors.join(','));
-    els.forEach(function(el, i){
-      el.classList.add('reveal');
-      el.style.transitionDelay = (Math.min(i % 4, 3) * 0.08) + 's';
+
+    const els = [];
+
+    groups.forEach(function(group){
+      document.querySelectorAll(group.selector).forEach(function(el, i){
+        const cls = group.cls === 'reveal-up' ? 'reveal' : group.cls;
+        el.classList.add(cls);
+        el.style.transitionDelay = (Math.min(i % 4, 3) * 0.08) + 's';
+        els.push(el);
+      });
     });
 
-    const observer = new IntersectionObserver(function(entries){
+    // Carousel cards: reveal once when the carousel scrolls into view.
+    // (Individual per-card observation is unreliable here because the cards
+    // sit inside a horizontally scrolling container — the browser treats
+    // cards clipped by that horizontal scroll as "not intersecting", which
+    // caused cards to randomly stay stuck at opacity:0.)
+    document.querySelectorAll('.p-grid .p-card').forEach(function(el, i){
+      el.classList.add('reveal-clip');
+      el.style.transitionDelay = (Math.min(i % 4, 3) * 0.08) + 's';
+    });
+    document.querySelectorAll('.carousel-wrap').forEach(function(wrap){
+      const cards = wrap.querySelectorAll('.p-grid .p-card');
+      const wrapObserver = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting) {
+            cards.forEach(function(card){ card.classList.add('in-view'); });
+            wrapObserver.disconnect();
+          }
+        });
+      }, {threshold:0.1});
+      wrapObserver.observe(wrap);
+    });
+
+    // Services rows: alternate slide-in from left / right
+    document.querySelectorAll('.s-row').forEach(function(el, i){
+      el.classList.add(i % 2 === 0 ? 'reveal-left' : 'reveal-right');
+      el.style.transitionDelay = (Math.min(i, 3) * 0.09) + 's';
+      els.push(el);
+    });
+
+    const addObserver = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
-        if(entry.isIntersecting){
+        if (entry.isIntersecting) {
           entry.target.classList.add('in-view');
-          observer.unobserve(entry.target);
         }
       });
     }, {threshold:0.12, rootMargin:'0px 0px -40px 0px'});
 
-    els.forEach(function(el){ observer.observe(el); });
+    const removeObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) {
+          entry.target.classList.remove('in-view');
+        }
+      });
+    }, {threshold:0});
+
+    els.forEach(function(el){
+      addObserver.observe(el);
+      removeObserver.observe(el);
+    });
   })();
 
   (function(){
@@ -1214,6 +1380,75 @@
       track.scrollBy({left: scrollAmount(), behavior:'smooth'});
       replayRiseAnimation();
     });
+  })();
+
+  // ===== Custom cursor =====
+  (function(){
+    if (!window.matchMedia('(pointer:fine)').matches) return;
+
+    var dot = document.getElementById('cursorDot');
+    var ring = document.getElementById('cursorRing');
+    if (!dot || !ring) return;
+
+    document.body.classList.add('custom-cursor-active');
+
+    var mouseX = window.innerWidth/2, mouseY = window.innerHeight/2;
+    var ringX = mouseX, ringY = mouseY;
+    var ringSpeed = 0.18; // lower = more lag/trail
+
+    window.addEventListener('mousemove', function(e){
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      dot.style.transform = 'translate(-50%,-50%) translate(' + mouseX + 'px,' + mouseY + 'px)';
+    });
+
+    function animateRing(){
+      ringX += (mouseX - ringX) * ringSpeed;
+      ringY += (mouseY - ringY) * ringSpeed;
+      ring.style.transform = 'translate(-50%,-50%) translate(' + ringX + 'px,' + ringY + 'px)';
+      requestAnimationFrame(animateRing);
+    }
+    requestAnimationFrame(animateRing);
+
+    document.addEventListener('mousedown', function(){ document.body.classList.add('cursor-click'); });
+    document.addEventListener('mouseup', function(){ document.body.classList.remove('cursor-click'); });
+
+    var hoverSelector = 'a, button, .pill, .s-card, .p-card, .s-row, .arrow, .arrow-inline, input, textarea';
+    document.addEventListener('mouseover', function(e){
+      if (e.target.closest(hoverSelector)) document.body.classList.add('cursor-hover');
+    });
+    document.addEventListener('mouseout', function(e){
+      if (e.target.closest(hoverSelector)) document.body.classList.remove('cursor-hover');
+    });
+
+    // hide cursor visuals when mouse leaves the window
+    document.addEventListener('mouseleave', function(){
+      dot.style.opacity = '0';
+      ring.style.opacity = '0';
+    });
+    document.addEventListener('mouseenter', function(){
+      dot.style.opacity = '';
+      ring.style.opacity = '';
+    });
+  })();
+
+  // ===== Touch ripple (mobile/tablet tap animation) =====
+  (function(){
+    document.addEventListener('touchstart', function(e){
+      var touch = e.touches[0];
+      if (!touch) return;
+      var ripple = document.createElement('div');
+      ripple.className = 'touch-ripple';
+      var size = 60;
+      ripple.style.width = size + 'px';
+      ripple.style.height = size + 'px';
+      ripple.style.left = touch.clientX + 'px';
+      ripple.style.top = touch.clientY + 'px';
+      document.body.appendChild(ripple);
+      ripple.addEventListener('animationend', function(){
+        ripple.remove();
+      });
+    }, {passive:true});
   })();
 </script>
 
