@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maison Varen | FTC World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0908;
+    --panel:#121110;
+    --ember-1:#c14bff;
+    --ember-2:#7b2ff0;
+    --ember-3:#1f0a33;
+    --white:#f7f5f2;
+    --muted:#9b958f;
+    --line:rgba(247,245,242,.1);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;overflow-x:hidden;width:100%;}
+  body{background:var(--bg);color:var(--white);font-family:'Inter',sans-serif;margin:0;overflow-x:hidden;width:100%;position:relative;}
+  ::selection{background:var(--ember-1);color:#160603;}
+  a{color:inherit;}
+  img{display:block;max-width:100%;}
+
+  /* ---------- custom cursor ---------- */
+  @media (pointer:fine){
+    body.custom-cursor-active, body.custom-cursor-active *{cursor:none !important;}
+  }
+  .cursor-dot,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;border-radius:50%;transform:translate(-50%,-50%);will-change:transform;}
+  .cursor-dot{width:6px;height:6px;background:var(--ember-1);transition:width .2s ease,height .2s ease,opacity .2s ease;}
+  .cursor-ring{
+    width:34px;height:34px;border:1px solid var(--ember-1);opacity:.7;
+    display:flex;align-items:center;justify-content:center;
+    transition:width .3s cubic-bezier(.2,.9,.3,1.2),height .3s cubic-bezier(.2,.9,.3,1.2),border-color .3s ease,opacity .3s ease,background .3s ease;
+  }
+  .cursor-ring-text{
+    font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--white);opacity:0;transition:opacity .2s ease;white-space:nowrap;
+  }
+  body.cursor-hover .cursor-ring{width:64px;height:64px;background:rgba(193,75,255,.14);border-color:var(--ember-1);opacity:1;}
+  body.cursor-hover .cursor-dot{width:0;height:0;opacity:0;}
+  body.cursor-view .cursor-ring{width:86px;height:86px;background:rgba(193,75,255,.18);}
+  body.cursor-view .cursor-ring-text{opacity:1;}
+  body.cursor-click .cursor-ring{width:26px;height:26px;}
+  @media (pointer:coarse){.cursor-dot,.cursor-ring{display:none;}}
+
+  /* ---------- scroll reveal ---------- */
+  .rv{opacity:0;transform:translateY(36px);transition:opacity .9s cubic-bezier(.16,.8,.3,1),transform .9s cubic-bezier(.16,.8,.3,1);}
+  .rv.in{opacity:1;transform:translateY(0);}
+  .rv-scale{opacity:0;transform:scale(.94);transition:opacity 1s cubic-bezier(.16,.8,.3,1),transform 1s cubic-bezier(.16,.8,.3,1);}
+  .rv-scale.in{opacity:1;transform:scale(1);}
+  @media (prefers-reduced-motion:reduce){.rv,.rv-scale{opacity:1;transform:none;transition:none;}}
+
+  .wrap{max-width:1280px;margin:0 auto;padding-left:6vw;padding-right:6vw;}
+
+  /* ---------- NAV (mini circular menu) ---------- */
+  .pill{display:inline-flex;align-items:center;gap:10px;background:var(--white);color:#160603;font-weight:600;font-size:.88rem;padding:11px 8px 11px 20px;border-radius:100px;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease;}
+  .pill:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(193,75,255,.28);}
+  .pill .arrow{width:28px;height:28px;border-radius:50%;background:var(--ember-1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+  #miniNav{position:fixed;top:24px;left:24px;z-index:400;}
+  #miniNavToggle{width:52px;height:52px;border-radius:50%;overflow:hidden;border:1px solid var(--line);background:rgba(120,110,100,.16);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:border-color .2s ease,background .2s ease;}
+  #miniNavToggle:hover{border-color:var(--ember-1);background:rgba(193,75,255,.16);}
+  #miniNavToggle span{display:block;width:18px;height:1.5px;background:var(--white);transition:transform .25s ease,opacity .25s ease;}
+  #miniNav.open #miniNavToggle span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+  #miniNav.open #miniNavToggle span:nth-child(2){opacity:0;}
+  #miniNav.open #miniNavToggle span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+  .mini-nav-panel{position:absolute;top:64px;left:0;display:flex;flex-direction:column;gap:2px;background:rgba(30,27,24,.55);border:1px solid var(--line);border-radius:16px;padding:10px;min-width:160px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-8px);transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s;}
+  #miniNav.open .mini-nav-panel{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0);transition:opacity .25s ease,transform .25s ease;}
+  .mini-nav-panel a{display:block;padding:10px 14px;border-radius:10px;color:var(--white);text-decoration:none;font-family:'Space Mono',monospace;font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;transition:background .2s ease;}
+  .mini-nav-panel a:hover{background:rgba(193,75,255,.14);}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;height:100vh;min-height:560px;overflow:hidden;}
+  .hero-media{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 20%,var(--ember-3),var(--bg) 68%);}
+  .hero-media img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+  .hero-media::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,9,8,.15) 0%,rgba(10,9,8,.85) 92%);}
+  .hero-ph-note{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);text-align:center;z-index:1;border:1px dashed rgba(247,245,242,.25);padding:18px 26px;border-radius:14px;
+  }
+  .hero-content{position:absolute;left:0;right:0;bottom:0;padding:0 6vw 64px;z-index:2;}
+  .hero-tag{font-family:'Space Mono',monospace;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ember-1);margin-bottom:18px;}
+  .hero h1{font-size:clamp(3rem,10vw,7.5rem);font-weight:800;line-height:.92;letter-spacing:-.02em;margin:0;text-transform:uppercase;}
+  .hero-scroll{position:absolute;right:6vw;bottom:64px;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .hero-scroll span{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);writing-mode:vertical-rl;}
+  .hero-scroll .line{width:1px;height:60px;background:linear-gradient(180deg,var(--ember-1),transparent);animation:scrollLine 1.8s ease-in-out infinite;}
+  @keyframes scrollLine{0%{transform:scaleY(0);transform-origin:top;}50%{transform:scaleY(1);transform-origin:top;}50.01%{transform-origin:bottom;}100%{transform:scaleY(0);transform-origin:bottom;}}
+
+  /* ---------- intro strip ---------- */
+  .moodboard{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:190px;gap:14px;padding:36px 6vw;border-bottom:1px solid var(--line);}
+  .mood-item{position:relative;border-radius:14px;overflow:hidden;background:linear-gradient(155deg,var(--ember-3),var(--panel) 75%);}
+  .mood-item img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+  .mood-b,.mood-c{grid-row:span 2;}
+  .mood-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  @media (max-width:900px){
+    .moodboard{grid-auto-rows:110px;gap:8px;padding:24px 5vw;}
+  }
+
+  /* ---------- split narrative (challenge / solution) ---------- */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid var(--line);}
+  .split-copy{padding:80px 6vw;display:flex;flex-direction:column;justify-content:center;}
+  .split-copy .num{font-family:'Inter',sans-serif;font-weight:700;color:var(--ember-1);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .split-copy .num::before{content:'';width:22px;height:1px;background:var(--ember-1);display:inline-block;}
+  .split-copy h2{font-size:clamp(2rem,4vw,3rem);font-weight:800;line-height:1.08;letter-spacing:-.015em;margin:0 0 20px;max-width:420px;}
+  .split-copy p{color:var(--muted);font-size:1.05rem;line-height:1.7;max-width:420px;margin:0;}
+  .split-media{position:relative;min-height:420px;overflow:hidden;background:linear-gradient(155deg,var(--ember-3),var(--panel) 75%);border-left:1px solid var(--line);}
+  .split.reverse{grid-template-columns:1fr 1fr;}
+  .split.reverse .split-media{order:-1;border-left:none;border-right:1px solid var(--line);}
+  .ph-note{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  .split-media img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+  @media (max-width:860px){.split,.split.reverse{grid-template-columns:1fr;}.split.reverse .split-media{order:0;border-right:none;border-left:none;border-bottom:1px solid var(--line);}.split-media{min-height:300px;}}
+
+  /* ---------- flashcard fan gallery ---------- */
+  .stack-section{padding:100px 6vw;border-bottom:1px solid var(--line);}
+  .stack-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:56px;gap:20px;flex-wrap:wrap;}
+  .stack-head h2{font-size:clamp(1.9rem,3.6vw,2.8rem);font-weight:800;letter-spacing:-.015em;margin:0;}
+  .stack-head p{color:var(--muted);max-width:280px;margin:0;font-family:'Space Mono',monospace;font-size:.75rem;letter-spacing:.03em;line-height:1.6;}
+  .stack-layout{display:grid;grid-template-columns:0.95fr 1.05fr;gap:56px;align-items:center;}
+  .stack-side{display:flex;flex-direction:column;align-items:flex-start;}
+  .stack{position:relative;height:440px;width:100%;display:flex;align-items:center;justify-content:flex-start;cursor:grab;transition:transform .4s cubic-bezier(.22,1.4,.36,1);touch-action:pan-y;}
+  .stack.is-dragging{cursor:grabbing;transition:none;}
+  .stack-controls{align-self:center;}
+  .stack-hint{align-self:center;}
+
+  .collage{display:grid;grid-template-columns:1.1fr 1fr;grid-template-rows:repeat(3,136px);gap:16px;height:440px;}
+  .collage-item{position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(155deg,var(--ember-3),var(--panel) 75%);border:1px solid var(--line);transition:transform .4s ease;}
+  .collage-item:hover{transform:translateY(-4px);}
+  .collage-item img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+  .item-a{grid-column:1;grid-row:1 / 3;}
+  .item-b{grid-column:2;grid-row:1 / 2;}
+  .item-c{grid-column:2;grid-row:2 / 4;}
+  .item-d{grid-column:1;grid-row:3 / 4;}
+
+  @media (max-width:900px){
+    .stack-layout{grid-template-columns:1fr;gap:48px;}
+    .stack-side{align-items:center;}
+    .stack{justify-content:center;}
+    .collage{height:360px;grid-template-rows:repeat(3,108px);}
+  }
+  .stack-card{
+    position:absolute;top:50%;left:50%;
+    width:220px;height:310px;border-radius:18px;overflow:hidden;cursor:pointer;
+    background:linear-gradient(155deg,var(--ember-3),var(--panel) 75%);
+    border:1px solid var(--line);
+    display:flex;align-items:flex-end;
+    transition:transform .7s cubic-bezier(.22,1.4,.36,1),opacity .5s ease,filter .5s ease,box-shadow .5s ease;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+    will-change:transform;
+  }
+  .stack-card.is-active{
+    cursor:default;
+    box-shadow:0 40px 90px -20px rgba(0,0,0,.7),0 0 0 2px var(--ember-1),0 0 60px -10px rgba(193,75,255,.55);
+  }
+  .stack-card img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+  .stack-card .card-face{position:relative;z-index:1;padding:22px;width:100%;}
+  .stack-card .card-face::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(10,9,8,.85));z-index:-1;}
+  .stack-card .card-tag{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ember-1);margin-bottom:6px;}
+  .stack-card .card-title{font-weight:700;font-size:1.05rem;}
+  .stack-card .card-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:22px;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  .stack-controls{display:flex;justify-content:center;align-items:center;gap:24px;margin-top:44px;}
+  .stack-btn{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--white);display:flex;align-items:center;justify-content:center;font-size:1.2rem;transition:border-color .2s ease,transform .2s ease,background .2s ease;}
+  .stack-btn:hover{border-color:var(--ember-1);background:rgba(193,75,255,.1);transform:translateY(-2px);}
+  .stack-counter{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--muted);min-width:52px;text-align:center;}
+  .stack-hint{text-align:center;margin-top:14px;font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);opacity:.7;}
+  @media (max-width:640px){.stack{height:400px;}.stack-card{width:180px;height:260px;}}
+
+  /* ---------- full bleed break ---------- */
+  .break-media{position:relative;aspect-ratio:21/8;overflow:hidden;background:linear-gradient(155deg,var(--ember-3),var(--panel) 75%);border-bottom:1px solid var(--line);}
+  .break-media img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+  @media (max-width:760px){.break-media{aspect-ratio:4/5;}}
+
+  /* ---------- quote ---------- */
+  .quote{padding:120px 6vw;text-align:center;border-bottom:1px solid var(--line);position:relative;}
+  .quote-mark{font-family:'Space Mono',monospace;font-size:5rem;color:var(--ember-1);opacity:.4;line-height:.5;margin-bottom:10px;}
+  .quote blockquote{margin:0 auto 24px;font-size:clamp(1.6rem,3.4vw,2.6rem);font-weight:700;line-height:1.3;letter-spacing:-.01em;max-width:760px;}
+  .quote-by{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+
+  /* ---------- related ---------- */
+  .related{padding:80px 6vw 100px;}
+  .related-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;gap:20px;flex-wrap:wrap;}
+  .related-head h2{font-size:clamp(1.9rem,3.6vw,2.8rem);font-weight:800;letter-spacing:-.015em;margin:0;}
+  .related-head a{color:var(--muted);text-decoration:none;font-family:'Space Mono',monospace;font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;}
+  .related-head a:hover{color:var(--white);}
+  .related-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .related-card{text-decoration:none;color:var(--white);display:block;overflow:hidden;border-radius:18px;position:relative;}
+  .related-media{aspect-ratio:4/3;position:relative;overflow:hidden;background:linear-gradient(155deg,var(--ember-3),var(--panel) 75%);transition:transform .5s cubic-bezier(.16,.8,.3,1);}
+  .related-card:hover .related-media{transform:scale(1.04);}
+  .related-media img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+  .related-info{padding:18px 4px 0;}
+  .related-tag{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .related-title{font-weight:700;font-size:1.2rem;}
+  @media (max-width:700px){.related-grid{grid-template-columns:1fr;}}
+
+  /* ---------- CTA + footer ---------- */
+  .cta{padding:100px 6vw;text-align:center;border-top:1px solid var(--line);}
+  .cta h2{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;letter-spacing:-.015em;margin:0 0 32px;}
+  footer{display:flex;justify-content:space-between;align-items:center;padding:26px 6vw 40px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);}
+  footer a{text-decoration:none;color:var(--muted);}
+  footer a:hover{color:var(--white);}
+</style>
+</head>
+<body>
+
+<!--
+  MAISON VAREN CASE STUDY (watch brand)
+  - Photos referenced as assets/maison-varen-N.jpg — none uploaded yet, add files with matching numbers to assets/.
+  - Numbering: 1 hero, 2-11 moodboard (10 shots), 12 challenge visual, 13 solution visual,
+    14-17 collage (4 shots), 18 break media, 19-23 fan gallery cards (5 shots).
+  - The gallery is a draggable/clickable flashcard fan (.stack). Edit the CARDS array near the bottom of the script to add, remove, or relabel cards.
+  - This page is not yet linked from index.html on purpose. Link it once you're ready.
+-->
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"><span class="cursor-ring-text" id="cursorRingText"></span></div>
+
+<nav id="miniNav">
+  <button id="miniNavToggle" aria-label="Menu" data-cursor="view" data-cursor-text="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="mini-nav-panel">
+    <a href="index.html" data-cursor="view" data-cursor-text="Go">Home</a>
+    <a href="index.html#portfolio" data-cursor="view" data-cursor-text="Go">Portfolio</a>
+    <a href="index.html#contact" data-cursor="view" data-cursor-text="Go">Contact</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-media" id="heroParallax">
+    <img src="assets/maison-varen-1.png" alt="Maison Varen hero visual">
+  </div>
+  <div class="hero-content">
+    <h1 class="rv">Maison<br>Varen</h1>
+  </div>
+  <div class="hero-scroll"><span>Scroll</span><div class="line"></div></div>
+</section>
+
+<section class="moodboard">
+  <div class="mood-item mood-a rv-scale"><img src="assets/maison-varen-2.png" alt="Maison Varen moodboard"></div>
+  <div class="mood-item mood-b rv-scale"><img src="assets/maison-varen-3.png" alt="Maison Varen moodboard"></div>
+  <div class="mood-item mood-c rv-scale"><img src="assets/maison-varen-4.png" alt="Maison Varen moodboard"></div>
+  <div class="mood-item mood-d rv-scale"><img src="assets/maison-varen-5.png" alt="Maison Varen moodboard"></div>
+  <div class="mood-item mood-e rv-scale"><img src="assets/maison-varen-6.png" alt="Maison Varen moodboard"></div>
+  <div class="mood-item mood-f rv-scale"><img src="assets/maison-varen-7.png" alt="Maison Varen moodboard"></div>
+  <div class="mood-item mood-g rv-scale"><img src="assets/maison-varen-8.png" alt="Maison Varen moodboard"></div>
+  <div class="mood-item mood-h rv-scale"><img src="assets/maison-varen-9.png" alt="Maison Varen moodboard"></div>
+  <div class="mood-item mood-i rv-scale"><img src="assets/maison-varen-10.png" alt="Maison Varen moodboard"></div>
+  <div class="mood-item mood-j rv-scale"><img src="assets/maison-varen-11.png" alt="Maison Varen moodboard"></div>
+</section>
+
+<div class="split">
+  <div class="split-copy rv">
+    <div class="num">Challenge</div>
+    <h2>The Watch Existed, The Campaign Didn't.</h2>
+    <p>Maison Varen had the product ready, but no imagery to introduce it, no macro shots, no lifestyle scenes, nothing to show it off with yet.</p>
+  </div>
+  <div class="split-media rv-scale">
+    <img src="assets/maison-varen-12.png" alt="Maison Varen challenge visual">
+  </div>
+</div>
+
+<div class="split reverse">
+  <div class="split-copy rv">
+    <div class="num">Solution</div>
+    <h2>A Full Campaign, Built From Nothing.</h2>
+    <p>FTC World produced every frame Maison Varen needed, from dial macros to lifestyle scenes on the wrist, giving the product the campaign it never had.</p>
+  </div>
+  <div class="split-media rv-scale">
+    <img src="assets/maison-varen-13.png" alt="Maison Varen solution visual">
+  </div>
+</div>
+
+<section class="stack-section">
+  <div class="stack-head rv">
+    <h2>Featured Frames</h2>
+  </div>
+  <div class="stack-layout">
+    <div class="stack-side">
+      <div class="stack rv-scale" id="cardStack"></div>
+      <div class="stack-controls">
+        <button class="stack-btn" id="stackPrev" aria-label="Previous">&#8249;</button>
+        <span class="stack-counter" id="stackCounter">01 / 05</span>
+        <button class="stack-btn" id="stackNext" aria-label="Next">&#8250;</button>
+      </div>
+    </div>
+    <div class="collage rv">
+      <div class="collage-item item-a">
+        <img src="assets/maison-varen-14.png" alt="Maison Varen strap detail">
+      </div>
+      <div class="collage-item item-b">
+        <img src="assets/maison-varen-15.png" alt="Maison Varen dial macro">
+      </div>
+      <div class="collage-item item-c">
+        <img src="assets/maison-varen-16.png" alt="Maison Varen packaging box">
+      </div>
+      <div class="collage-item item-d">
+        <img src="assets/maison-varen-17.png" alt="Maison Varen movement detail">
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="break-media rv-scale">
+  <img src="assets/maison-varen-18.png" alt="Maison Varen campaign wide shot">
+</div>
+
+<section class="quote">
+  <div class="quote-mark rv">&#8220;</div>
+  <blockquote class="rv">Every reflection, every stitch, every wrist shot existed before we cased a single watch.</blockquote>
+  <div class="quote-by rv">Founder, Maison Varen</div>
+</section>
+
+
+<section class="related">
+  <div class="related-head rv">
+    <h2>Related Work</h2>
+    <a href="index.html#portfolio">See All &#8594;</a>
+  </div>
+  <div class="related-grid">
+    <a class="related-card rv" href="index.html#portfolio" data-cursor="view" data-cursor-text="View">
+      <div class="related-media"><img src="" alt="Related project placeholder"><div class="ph-note">Placeholder</div></div>
+      <div class="related-info"><div class="related-tag">Campaign</div><div class="related-title">Add Next Case Study</div></div>
+    </a>
+    <a class="related-card rv" href="index.html#portfolio" data-cursor="view" data-cursor-text="View">
+      <div class="related-media"><img src="" alt="Related project placeholder"><div class="ph-note">Placeholder</div></div>
+      <div class="related-info"><div class="related-tag">Editorial</div><div class="related-title">Add Next Case Study</div></div>
+    </a>
+  </div>
+</section>
+
+<section class="cta">
+  <h2 class="rv">Have A Project In Mind</h2>
+  <a href="https://wa.me/6281290905387" target="_blank" rel="noopener" class="pill">Get in Touch <span class="arrow">→</span></a>
+</section>
+
+<footer>
+  <span>© 2026 FTC WORLD</span>
+  <a href="https://www.instagram.com/purpleview.zl/" target="_blank" rel="noopener">@purpleview.zl</a>
+</footer>
+
+<script>
+  // ===== custom cursor =====
+  (function(){
+    if (!window.matchMedia('(pointer:fine)').matches) return;
+    var dot = document.getElementById('cursorDot');
+    var ring = document.getElementById('cursorRing');
+    var ringText = document.getElementById('cursorRingText');
+    if (!dot || !ring) return;
+    document.body.classList.add('custom-cursor-active');
+    var mouseX = innerWidth/2, mouseY = innerHeight/2, ringX = mouseX, ringY = mouseY, speed = .18;
+    addEventListener('mousemove', function(e){
+      mouseX = e.clientX; mouseY = e.clientY;
+      dot.style.transform = 'translate(-50%,-50%) translate(' + mouseX + 'px,' + mouseY + 'px)';
+    });
+    (function loop(){
+      ringX += (mouseX - ringX) * speed;
+      ringY += (mouseY - ringY) * speed;
+      ring.style.transform = 'translate(-50%,-50%) translate(' + ringX + 'px,' + ringY + 'px)';
+      requestAnimationFrame(loop);
+    })();
+    document.addEventListener('mousedown', function(){ document.body.classList.add('cursor-click'); });
+    document.addEventListener('mouseup', function(){ document.body.classList.remove('cursor-click'); });
+    var hoverSel = 'a, button, .pill, .stack-card, .stack-btn, .related-card';
+    document.addEventListener('mouseover', function(e){
+      var t = e.target.closest(hoverSel);
+      if (!t) return;
+      document.body.classList.add('cursor-hover');
+      var viewTarget = e.target.closest('[data-cursor="view"]');
+      if (viewTarget) {
+        document.body.classList.add('cursor-view');
+        ringText.textContent = viewTarget.getAttribute('data-cursor-text') || 'View';
+      }
+    });
+    document.addEventListener('mouseout', function(e){
+      var t = e.target.closest(hoverSel);
+      if (!t) return;
+      document.body.classList.remove('cursor-hover');
+      document.body.classList.remove('cursor-view');
+      ringText.textContent = '';
+    });
+    document.addEventListener('mouseleave', function(){ dot.style.opacity='0'; ring.style.opacity='0'; });
+    document.addEventListener('mouseenter', function(){ dot.style.opacity=''; ring.style.opacity=''; });
+  })();
+
+  // ===== mini nav toggle =====
+  (function(){
+    var toggle = document.getElementById('miniNavToggle'), nav = document.getElementById('miniNav');
+    if (toggle && nav){
+      toggle.addEventListener('click', function(){ nav.classList.toggle('open'); });
+      nav.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', function(){ nav.classList.remove('open'); }); });
+    }
+  })();
+
+  // ===== hero parallax =====
+  (function(){
+    var media = document.getElementById('heroParallax');
+    if (!media) return;
+    addEventListener('scroll', function(){
+      var y = scrollY;
+      media.style.transform = 'translateY(' + (y * 0.35) + 'px) scale(' + (1 + Math.min(y,600)/4000) + ')';
+    }, {passive:true});
+  })();
+
+  // ===== scroll reveal (repeats every time an element enters/leaves view) =====
+  (function(){
+    var els = document.querySelectorAll('.rv, .rv-scale');
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        entry.target.classList.toggle('in', entry.isIntersecting);
+      });
+    }, {threshold:0.15});
+    els.forEach(function(el, i){ el.style.transitionDelay = (Math.min(i%4,3) * 0.07) + 's'; io.observe(el); });
+  })();
+
+  // ===== flashcard fan gallery =====
+  // Cards sit side by side in a fan, each one only partly visible.
+  // Clicking (or Prev/Next) slides the chosen card up front with a smooth
+  // transform transition — the DOM nodes are built once and only their
+  // transform/opacity change, so the browser animates the move itself.
+  (function(){
+    var CARDS = [
+      { tag:'Product', title:'Dial, Macro Detail', src:'assets/maison-varen-19.png' },
+      { tag:'Campaign', title:'On Wrist, Studio Light', src:'assets/maison-varen-20.png' },
+      { tag:'Lifestyle', title:'On Wrist, Outdoor', src:'assets/maison-varen-21.png' },
+      { tag:'Product', title:'Case And Crown, Detail', src:'assets/maison-varen-22.png' },
+      { tag:'Lifestyle', title:'Editorial, Wide Shot', src:'assets/maison-varen-23.png' }
+    ];
+    var stack = document.getElementById('cardStack');
+    var counter = document.getElementById('stackCounter');
+    if (!stack) return;
+
+    var activeIndex = Math.floor(CARDS.length / 2);
+    var cardEls = CARDS.map(function(c, i){
+      var el = document.createElement('div');
+      el.className = 'stack-card';
+      el.innerHTML =
+        '<img src="' + (c.src || '') + '" alt="' + c.title + '">' +
+        (c.src ? '' : '<div class="card-ph">Photo Placeholder<br>' + c.tag + '</div>') +
+        '<div class="card-face"><div class="card-tag">' + c.tag + '</div><div class="card-title">' + c.title + '</div></div>';
+      el.dataset.idx = String(i);
+      stack.appendChild(el);
+      return el;
+    });
+
+    var SPREAD = 72;    // horizontal gap between neighboring cards, px
+    var ROTATE = 14;    // fan rotation per step, degrees
+    var MAX_SIDE = 3;   // how many neighbors stay visible on each side
+
+    function layout(){
+      cardEls.forEach(function(el, i){
+        var offset = i - activeIndex;
+        var abs = Math.abs(offset);
+        var isActive = offset === 0;
+        var clamped = Math.max(-MAX_SIDE, Math.min(MAX_SIDE, offset));
+        var x = clamped * SPREAD;
+        var rot = clamped * ROTATE;
+        var y = isActive ? -34 : 22;
+        var scale = isActive ? 1.06 : 0.82;
+        el.style.transform = 'translate(-50%,-50%) translate(' + x + 'px,' + y + 'px) rotate(' + rot + 'deg) scale(' + scale + ')';
+        el.style.zIndex = String(100 - abs);
+        el.style.opacity = abs > MAX_SIDE ? '0' : (isActive ? '1' : '0.5');
+        el.style.filter = isActive ? 'none' : 'brightness(.6) saturate(.7)';
+        el.classList.toggle('is-active', isActive);
+        if (isActive){
+          el.removeAttribute('data-cursor');
+        } else {
+          el.setAttribute('data-cursor', 'view');
+          el.setAttribute('data-cursor-text', 'View');
+        }
+      });
+      counter.textContent = String(activeIndex + 1).padStart(2,'0') + ' / ' + String(CARDS.length).padStart(2,'0');
+    }
+
+    function setActive(i){
+      activeIndex = (i + CARDS.length) % CARDS.length;
+      layout();
+    }
+
+    document.getElementById('stackNext').addEventListener('click', function(){ setActive(activeIndex + 1); });
+    document.getElementById('stackPrev').addEventListener('click', function(){ setActive(activeIndex - 1); });
+
+    var startX = null, dragging = false, downTarget = null;
+    stack.addEventListener('pointerdown', function(e){
+      startX = e.clientX;
+      dragging = true;
+      downTarget = e.target;
+      stack.classList.add('is-dragging');
+      if (e.target.setPointerCapture) { try { e.target.setPointerCapture(e.pointerId); } catch(err){} }
+    });
+    stack.addEventListener('pointermove', function(e){
+      if (!dragging || startX === null) return;
+      var dx = e.clientX - startX;
+      var pull = Math.max(-90, Math.min(90, dx * 0.5));
+      stack.style.transform = 'translateX(' + pull + 'px) rotate(' + (pull * 0.04) + 'deg)';
+    });
+    function endDrag(e){
+      if (!dragging) return;
+      dragging = false;
+      stack.classList.remove('is-dragging');
+      stack.style.transform = '';
+      if (startX === null) return;
+      var dx = e.clientX - startX;
+      startX = null;
+      if (Math.abs(dx) > 28) {
+        // real swipe: always advances, works every time no matter how many times in a row
+        setActive(activeIndex + (dx < 0 ? 1 : -1));
+      } else if (downTarget) {
+        // treated as a tap: jump straight to the tapped card, no native click needed
+        var cardEl = downTarget.closest ? downTarget.closest('.stack-card') : null;
+        if (cardEl && cardEl.dataset.idx !== undefined) { setActive(parseInt(cardEl.dataset.idx, 10)); }
+      }
+      downTarget = null;
+    }
+    stack.addEventListener('pointerup', endDrag);
+    stack.addEventListener('pointercancel', endDrag);
+
+    layout();
+  })();
+</script>
+
+</body>
+</html>
